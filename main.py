@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import Response
 from pydantic import BaseModel
+from typing import Optional
 
 app = FastAPI(
     title="Task API",
@@ -7,9 +9,14 @@ app = FastAPI(
     version="1.0"
 )
 
-# Request Model
+# Request Models
 class TaskCreate(BaseModel):
     title: str
+
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    done: Optional[bool] = None
 
 
 # In-memory Database
@@ -45,9 +52,7 @@ def root():
 # Health Check
 @app.get("/health", summary="Health Check")
 def health():
-    return {
-        "status": "ok"
-    }
+    return {"status": "ok"}
 
 
 # Get All Tasks
@@ -70,7 +75,7 @@ def get_task(task_id: int):
     )
 
 
-# Create New Task
+# Create Task
 @app.post(
     "/tasks",
     summary="Create New Task",
@@ -95,3 +100,52 @@ def create_task(task: TaskCreate):
     tasks.append(new_task)
 
     return new_task
+
+
+# Update Task
+@app.put("/tasks/{task_id}", summary="Update Task")
+def update_task(task_id: int, updated_task: TaskUpdate):
+
+    for task in tasks:
+
+        if task["id"] == task_id:
+
+            if updated_task.title is not None:
+
+                if updated_task.title.strip() == "":
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Title cannot be empty"
+                    )
+
+                task["title"] = updated_task.title.strip()
+
+            if updated_task.done is not None:
+                task["done"] = updated_task.done
+
+            return task
+
+    raise HTTPException(
+        status_code=404,
+        detail=f"Task {task_id} not found"
+    )
+
+
+# Delete Task
+@app.delete(
+    "/tasks/{task_id}",
+    summary="Delete Task",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+def delete_task(task_id: int):
+
+    for index, task in enumerate(tasks):
+
+        if task["id"] == task_id:
+            tasks.pop(index)
+            return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    raise HTTPException(
+        status_code=404,
+        detail=f"Task {task_id} not found"
+    )
