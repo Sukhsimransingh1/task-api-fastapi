@@ -91,8 +91,10 @@ def create_task(task: TaskCreate):
             detail="Title cannot be empty"
         )
 
+    next_id = max(task["id"] for task in tasks) + 1 if tasks else 1
+
     new_task = {
-        "id": len(tasks) + 1,
+        "id": next_id,
         "title": title,
         "done": False
     }
