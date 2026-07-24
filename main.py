@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import Response
 from pydantic import BaseModel
+from typing import Optional
 import sqlite3
 
 app = FastAPI(
@@ -11,9 +13,14 @@ app = FastAPI(
 DATABASE = "tasks.db"
 
 
-# Request Model
+# Request Models
 class TaskCreate(BaseModel):
     title: str
+
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    done: Optional[bool] = None
 
 
 # Database Initialization
@@ -49,7 +56,7 @@ def init_db():
 init_db()
 
 
-# Root Endpoint
+# Root
 @app.get("/")
 def root():
     return {
@@ -59,7 +66,7 @@ def root():
     }
 
 
-# Health Check
+# Health
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -74,20 +81,19 @@ def get_tasks():
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM tasks")
+
     rows = cursor.fetchall()
 
     conn.close()
 
-    tasks = []
-
-    for row in rows:
-        tasks.append({
+    return [
+        {
             "id": row["id"],
             "title": row["title"],
             "done": bool(row["done"])
-        })
-
-    return tasks
+        }
+        for row in rows
+    ]
 
 
 # Get Task By ID
@@ -151,3 +157,94 @@ def create_task(task: TaskCreate):
         "title": title,
         "done": False
     }
+
+
+# Update Task
+@app.put("/tasks/{task_id}")
+def update_task(task_id: int, updated_task: TaskUpdate):
+
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT * FROM tasks WHERE id = ?",
+        (task_id,)
+    )
+
+    task = cursor.fetchone()
+
+    if task is None:
+        conn.close()
+        raise HTTPException(
+            status_code=404,
+            detail=f"Task {task_id} not found"
+        )
+
+    title = task["title"]
+    done = task["done"]
+
+    if updated_task.title is not None:
+        if updated_task.title.strip() == "":
+            conn.close()
+            raise HTTPException(
+                status_code=400,
+                detail="Title cannot be empty"
+            )
+        title = updated_task.title.strip()
+
+    if updated_task.done is not None:
+        done = int(updated_task.done)
+
+    cursor.execute(
+        """
+        UPDATE tasks
+        SET title = ?, done = ?
+        WHERE id = ?
+        """,
+        (title, done, task_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return {
+        "id": task_id,
+        "title": title,
+        "done": bool(done)
+    }
+
+
+# Delete Task
+@app.delete(
+    "/tasks/{task_id}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+def delete_task(task_id: int):
+
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT * FROM tasks WHERE id = ?",
+        (task_id,)
+    )
+
+    task = cursor.fetchone()
+
+    if task is None:
+        conn.close()
+        raise HTTPException(
+            status_code=404,
+            detail=f"Task {task_id} not found"
+        )
+
+    cursor.execute(
+        "DELETE FROM tasks WHERE id = ?",
+        (task_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
