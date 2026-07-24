@@ -1,16 +1,16 @@
 # FlyRank Task API (SQLite)
 
-A RESTful Task Management API built with **FastAPI** and **SQLite**. This project supports full CRUD (Create, Read, Update, Delete) operations and stores data persistently using a SQLite database.
+A RESTful Task Management API built with **FastAPI** and **SQLite**. The API supports full CRUD (Create, Read, Update, Delete) operations with persistent data storage.
 
 ---
 
 ## Features
 
-- Create tasks
-- Read all tasks
-- Read a task by ID
-- Update tasks
-- Delete tasks
+- Create a task
+- Get all tasks
+- Get a task by ID
+- Update a task
+- Delete a task
 - SQLite database for persistent storage
 - Interactive Swagger UI documentation
 
@@ -21,8 +21,8 @@ A RESTful Task Management API built with **FastAPI** and **SQLite**. This projec
 - Python 3
 - FastAPI
 - SQLite
-- Uvicorn
 - Pydantic
+- Uvicorn
 
 ---
 
@@ -40,8 +40,6 @@ Create a virtual environment:
 ```bash
 python -m venv venv
 ```
-
-Activate the environment:
 
 ### Windows
 
@@ -63,13 +61,13 @@ pip install -r requirements.txt
 
 ---
 
-## Run the API
+## Run the Application
 
 ```bash
 uvicorn main:app --reload
 ```
 
-Swagger UI:
+Open Swagger UI:
 
 ```
 http://127.0.0.1:8000/docs
@@ -81,19 +79,19 @@ http://127.0.0.1:8000/docs
 
 | Method | Endpoint | Description |
 |---------|----------|-------------|
-| GET | / | Root endpoint |
-| GET | /health | Health check |
-| GET | /tasks | Get all tasks |
-| GET | /tasks/{id} | Get task by ID |
-| POST | /tasks | Create a task |
-| PUT | /tasks/{id} | Update a task |
-| DELETE | /tasks/{id} | Delete a task |
+| GET | `/` | Root endpoint |
+| GET | `/health` | Health check |
+| GET | `/tasks` | Get all tasks |
+| GET | `/tasks/{id}` | Get task by ID |
+| POST | `/tasks` | Create a new task |
+| PUT | `/tasks/{id}` | Update a task |
+| DELETE | `/tasks/{id}` | Delete a task |
 
 ---
 
 ## SQLite Database
 
-The application stores all task data in a local SQLite database (`tasks.db`). The database and table are created automatically when the application starts. Three sample tasks are inserted only if the table is empty.
+The application uses SQLite for persistent storage. The database (`tasks.db`) and the `tasks` table are created automatically when the application starts. Three sample tasks are inserted only if the table is empty.
 
 Example SQL query:
 
@@ -107,33 +105,11 @@ SELECT * FROM tasks;
 
 ### Swagger UI
 
-Create an `images` folder and save your Swagger screenshot as:
-
-```
-images/swagger-ui.png
-```
-
-Then reference it:
-
-```markdown
 ![Swagger UI](images/swagger-ui.png)
-```
-
----
 
 ### SQLite Database
 
-Save your DB Browser screenshot as:
-
-```
-images/sqlite-db.png
-```
-
-Then reference it:
-
-```markdown
 ![SQLite Database](images/sqlite-db.png)
-```
 
 ---
 
@@ -145,8 +121,8 @@ flyrank-task-api/
 │   ├── swagger-ui.png
 │   └── sqlite-db.png
 │── main.py
-│── requirements.txt
 │── README.md
+│── requirements.txt
 │── .gitignore
 ```
 
@@ -154,4 +130,4 @@ flyrank-task-api/
 
 ## Author
 
-Sukhsimran Singh
+**Sukhsimran Singh**
