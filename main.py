@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status
+from pydantic import BaseModel
 import sqlite3
 
 app = FastAPI(
@@ -8,6 +9,11 @@ app = FastAPI(
 )
 
 DATABASE = "tasks.db"
+
+
+# Request Model
+class TaskCreate(BaseModel):
+    title: str
 
 
 # Database Initialization
@@ -56,9 +62,7 @@ def root():
 # Health Check
 @app.get("/health")
 def health():
-    return {
-        "status": "ok"
-    }
+    return {"status": "ok"}
 
 
 # Get All Tasks
@@ -70,7 +74,6 @@ def get_tasks():
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM tasks")
-
     rows = cursor.fetchall()
 
     conn.close()
@@ -114,4 +117,37 @@ def get_task(task_id: int):
         "id": row["id"],
         "title": row["title"],
         "done": bool(row["done"])
+    }
+
+
+# Create Task
+@app.post("/tasks", status_code=status.HTTP_201_CREATED)
+def create_task(task: TaskCreate):
+
+    title = task.title.strip()
+
+    if title == "":
+        raise HTTPException(
+            status_code=400,
+            detail="Title cannot be empty"
+        )
+
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+        (title, 0)
+    )
+
+    conn.commit()
+
+    new_id = cursor.lastrowid
+
+    conn.close()
+
+    return {
+        "id": new_id,
+        "title": title,
+        "done": False
     }
