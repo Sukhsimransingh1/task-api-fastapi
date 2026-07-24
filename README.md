@@ -1,73 +1,157 @@
-# 🚀 Task API
+# FlyRank Task API (SQLite)
 
-A simple RESTful CRUD API built using **FastAPI** for managing tasks.
+A RESTful Task Management API built with **FastAPI** and **SQLite**. This project supports full CRUD (Create, Read, Update, Delete) operations and stores data persistently using a SQLite database.
 
-## 🛠️ Tech Stack
+---
 
-- Python
+## Features
+
+- Create tasks
+- Read all tasks
+- Read a task by ID
+- Update tasks
+- Delete tasks
+- SQLite database for persistent storage
+- Interactive Swagger UI documentation
+
+---
+
+## Tech Stack
+
+- Python 3
 - FastAPI
+- SQLite
 - Uvicorn
 - Pydantic
 
-## ⚙️ Installation
+---
+
+## Installation
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/Sukhsimransingh1/flyrank-task-api.git
 cd flyrank-task-api
+```
 
+Create a virtual environment:
+
+```bash
 python -m venv venv
+```
 
-# Windows
+Activate the environment:
+
+### Windows
+
+```bash
 venv\Scripts\activate
+```
 
+### Linux / macOS
+
+```bash
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 
-## ▶️ Run the Project
+---
+
+## Run the API
 
 ```bash
 uvicorn main:app --reload
 ```
 
-Open your browser:
+Swagger UI:
 
-- **API:** http://127.0.0.1:8000
-- **Swagger UI:** http://127.0.0.1:8000/docs
-
----
-
-## 📌 API Endpoints
-
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/` | API Information |
-| GET | `/health` | Health Check |
-| GET | `/tasks` | Get All Tasks |
-| GET | `/tasks/{task_id}` | Get Task By ID |
-| POST | `/tasks` | Create New Task |
-| PUT | `/tasks/{task_id}` | Update Task |
-| DELETE | `/tasks/{task_id}` | Delete Task |
-
----
-
-## 🧪 Example cURL
-
-```bash
-curl -i -X POST http://127.0.0.1:8000/tasks \
--H "Content-Type: application/json" \
--d "{\"title\":\"Buy Milk\"}"
+```
+http://127.0.0.1:8000/docs
 ```
 
 ---
 
-## 📷 Swagger UI
+## API Endpoints
 
-![Swagger UI](images/swagger-ui.png)
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | / | Root endpoint |
+| GET | /health | Health check |
+| GET | /tasks | Get all tasks |
+| GET | /tasks/{id} | Get task by ID |
+| POST | /tasks | Create a task |
+| PUT | /tasks/{id} | Update a task |
+| DELETE | /tasks/{id} | Delete a task |
 
 ---
 
-## 👨‍💻 Author
+## SQLite Database
 
-**Sukhsimran Singh**
+The application stores all task data in a local SQLite database (`tasks.db`). The database and table are created automatically when the application starts. Three sample tasks are inserted only if the table is empty.
 
-GitHub: https://github.com/Sukhsimransingh1
+Example SQL query:
+
+```sql
+SELECT * FROM tasks;
+```
+
+---
+
+## Screenshots
+
+### Swagger UI
+
+Create an `images` folder and save your Swagger screenshot as:
+
+```
+images/swagger-ui.png
+```
+
+Then reference it:
+
+```markdown
+![Swagger UI](images/swagger-ui.png)
+```
+
+---
+
+### SQLite Database
+
+Save your DB Browser screenshot as:
+
+```
+images/sqlite-db.png
+```
+
+Then reference it:
+
+```markdown
+![SQLite Database](images/sqlite-db.png)
+```
+
+---
+
+## Project Structure
+
+```
+flyrank-task-api/
+│── images/
+│   ├── swagger-ui.png
+│   └── sqlite-db.png
+│── main.py
+│── requirements.txt
+│── README.md
+│── .gitignore
+```
+
+---
+
+## Author
+
+Sukhsimran Singh
