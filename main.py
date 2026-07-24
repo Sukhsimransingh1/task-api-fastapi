@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import sqlite3
 
 app = FastAPI(
@@ -15,7 +15,6 @@ def init_db():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
-    # Create table if it doesn't exist
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,11 +23,9 @@ def init_db():
         )
     """)
 
-    # Check if table is empty
     cursor.execute("SELECT COUNT(*) FROM tasks")
     count = cursor.fetchone()[0]
 
-    # Seed data only once
     if count == 0:
         cursor.executemany(
             "INSERT INTO tasks (title, done) VALUES (?, ?)",
@@ -43,24 +40,78 @@ def init_db():
     conn.close()
 
 
-# Initialize database
 init_db()
 
 
-# Existing Endpoints
+# Root Endpoint
 @app.get("/")
 def root():
     return {
         "name": "Task API",
         "version": "2.0",
-        "endpoints": [
-            "/tasks"
-        ]
+        "endpoints": ["/tasks"]
     }
 
 
+# Health Check
 @app.get("/health")
 def health():
     return {
         "status": "ok"
+    }
+
+
+# Get All Tasks
+@app.get("/tasks")
+def get_tasks():
+
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM tasks")
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    tasks = []
+
+    for row in rows:
+        tasks.append({
+            "id": row["id"],
+            "title": row["title"],
+            "done": bool(row["done"])
+        })
+
+    return tasks
+
+
+# Get Task By ID
+@app.get("/tasks/{task_id}")
+def get_task(task_id: int):
+
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT * FROM tasks WHERE id = ?",
+        (task_id,)
+    )
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    if row is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Task {task_id} not found"
+        )
+
+    return {
+        "id": row["id"],
+        "title": row["title"],
+        "done": bool(row["done"])
     }
